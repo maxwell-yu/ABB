@@ -108,8 +108,8 @@ path : path of pic
 """
 def pic_process(color,flag,path):
    img=cv.imread(path)
-   #img = cv.transpose(img)
-   #img = cv.flip(img, 0)
+   img = cv.transpose(img)
+   img = cv.flip(img, 0)
    cv.imshow('img',img)
    if flag == True:
       dehaze_array = deHaze(img/255.0)*255
@@ -132,10 +132,17 @@ def pic_process(color,flag,path):
       ret2,ROI2=cv.threshold(ROI_S,110,255,cv.THRESH_BINARY_INV)
       cv.imshow("roi_S",ROI2)
       ROI3=cv.bitwise_and(ROI1,ROI2)
+      trackheigh = [0]
+      dischargeheigh = [0]
       contours, hierarchy = cv.findContours(ROI3,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
       for i in range(len(contours)):
          discharge_area = discharge_area + cv.contourArea(contours[i])
          cv.drawContours(ROI,contours,i,(0,255,0),1)
+         pentagram = contours[i]
+         lowmost = tuple(pentagram[:,0][pentagram[:,:,1].argmin()])  #高低方向上
+         highmost = tuple(pentagram[:,0][pentagram[:,:,1].argmax()])
+         dischargeheigh.append(highmost[1]-lowmost[1])
+      dischargeheigh_percent = 100*max(dischargeheigh)/ROI.shape[0]
       discharge_percentage=discharge_area*100/(ROI.shape[0]*ROI.shape[1])
       if discharge_percentage>0.1:
          ret1,ROI4 = cv.threshold(ROI_GRAY,155,255,cv.THRESH_BINARY_INV)
@@ -144,12 +151,18 @@ def pic_process(color,flag,path):
       ROI3=cv.bitwise_xor(ROI4,ROI1)
       contours, hierarchy = cv.findContours(ROI3,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
       for i in range(len(contours)):
-         rect = cv.boundingRect(contours[i])
          tracking_area=cv.contourArea(contours[i])+tracking_area
          cv.drawContours(ROI, contours,i , (255,0,128),1,)
+         pentagram = contours[i]
+         lowmost = tuple(pentagram[:,0][pentagram[:,:,1].argmin()])  #高低方向上
+         highmost = tuple(pentagram[:,0][pentagram[:,:,1].argmax()])
+         trackheigh.append(highmost[1]-lowmost[1])
+      trackheigh_percent = 100*max(trackheigh)/ROI.shape[0]
       tracking_percentage=tracking_area*100/(ROI.shape[0]*ROI.shape[1])
-      print("insulation tracking %.2f%%" % tracking_percentage)
-      print("Discharge %.2f%%" % discharge_percentage)
+      print("trackarea %.2f%%" % tracking_percentage)
+      print("trackheigh percent %.2f%%" % trackheigh_percent)
+      print("Dischargearea %.2f%%" % discharge_percentage)
+      print("distrageheigh percent %.2f%%" % dischargeheigh_percent)
       cv.imshow("Region",ROI)
       cv.waitKey(0)
       cv.destroyAllWindows()
@@ -166,9 +179,16 @@ def pic_process(color,flag,path):
       ret1,ROI1=cv.threshold(ROI_V,50,255,cv.THRESH_BINARY_INV)
       cv.imshow("roi_v",ROI1)
       contours, hierarchy = cv.findContours(ROI1,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+      trackheigh = [0]
+      dischargeheigh = [0]
       for i in range(len(contours)):
          tracking_area = tracking_area + cv.contourArea(contours[i])
          cv.drawContours(ROI,contours,i,(0,255,0),1)
+         pentagram = contours[i]
+         lowmost = tuple(pentagram[:,0][pentagram[:,:,1].argmin()])  
+         highmost = tuple(pentagram[:,0][pentagram[:,:,1].argmax()])
+         trackheigh.append(highmost[1]-lowmost[1])
+      trackheigh_percent = 100*max(trackheigh)/ROI.shape[0]
       tracking_percentage=tracking_area*100/(ROI.shape[0]*ROI.shape[1])
       ret2,ROI2=cv.threshold(ROI_GRAY,180,255,cv.THRESH_BINARY)
       cv.imshow("roi_gray",ROI2)
@@ -176,9 +196,18 @@ def pic_process(color,flag,path):
       for i in range(len(contours)):
          discharge_area = discharge_area + cv.contourArea(contours[i])
          cv.drawContours(ROI,contours,i,(255,0,128),1)
+         pentagram = contours[i]
+         lowmost = tuple(pentagram[:,0][pentagram[:,:,1].argmin()])  
+         highmost = tuple(pentagram[:,0][pentagram[:,:,1].argmax()])
+         cv.circle(ROI, lowmost, 2, (0,255,255),3)   
+         cv.circle(ROI, highmost, 2, (0,0,255),3)
+         dischargeheigh.append(highmost[1]-lowmost[1])
+      dischargeheigh_percent = 100*max(dischargeheigh)/ROI.shape[0]
       discharge_percentage=discharge_area*100/(ROI.shape[0]*ROI.shape[1])
-      print("insulation tracking %.2f%%" % tracking_percentage)
-      print("Discharge %.2f%%" % discharge_percentage)
+      print("trackarea %.2f%%" % tracking_percentage)
+      print("trackheigh percent %.2f%%" % trackheigh_percent)
+      print("Dischargearea %.2f%%" % discharge_percentage)
+      print("distrageheigh percent %.2f%%" % dischargeheigh_percent)
       cv.imshow("Region",ROI)
       cv.waitKey(0)
       cv.destroyAllWindows()
@@ -189,8 +218,6 @@ if __name__ == "__main__":
    for root,dirs,files in os.walk(image_road):
       for file in files:
          path=root+'/'+file
-         a,b = pic_process('red',True,path)
-         print("%f %f" % (a,b))
-
-
+         pic_process('red',False,path)
+         #print("%f %f" % (a,b))
 

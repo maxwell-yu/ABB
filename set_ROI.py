@@ -1,4 +1,4 @@
-# 调用csv/cv2/numpy/os/time库
+# 调用csv/cv2/numpy/os/time库。。。。
 import os
 import cv2 as cv
 import numpy as np
