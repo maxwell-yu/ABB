@@ -58,3 +58,4 @@ for item,key in dic.items():
         csv_write = csv.writer(csv_file,dialect='excel')
         csv_write.writerow(stu1)
         csv_file.close()
+        cv.waitkey()
