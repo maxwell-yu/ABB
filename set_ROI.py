@@ -12,6 +12,40 @@ x_list = []
 y_list = []
 
 """
+函数功能：给定初始函数路径之后，根据初始路径生成所要的文件目录
+"""
+def file_prepare():
+    local_path = g_filepath + '/' + 'origin'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'cut'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'click'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'perspective'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'picpick'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'perspective-auto'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path) 
+    local_path = g_filepath + '/' + 'board_select'
+    isExists = os.path.exists(local_path)
+    if not isExists:
+        os.makedirs(local_path)
+
+
+"""
 函数功能：初始图片过大，因此本函数通过手工选定位置，裁剪出含board部分图片
 """
 def cut_picture():
@@ -165,6 +199,7 @@ def click_picture():
 
 if __name__ == "__main__":
     print ('This is main of module "set_ROI.py"')
+    file_prepare()
     cut_picture()
     perspective_transform()
     click_picture()
