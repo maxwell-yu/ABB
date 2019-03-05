@@ -105,8 +105,9 @@ def deHaze(m, r=81, eps=0.001, w=0.95, maxV1=0.80, bGamma=False):
 color ：white / red
 flag : True/False 去烟
 path : path of pic
+ROIlast:前一个tracking的ROI
 """
-def pic_process(color,flag,path):
+def pic_process(color,flag,path,ROIlast):
    img=cv.imread(path)
    img = cv.transpose(img)
    img = cv.flip(img, 0)
@@ -176,8 +177,9 @@ def pic_process(color,flag,path):
       ROI_V=cv.split(ROI_HSV)[2]
       ROI_V=gamma_trans(ROI_V,0.5)
       ROI_V = cv.equalizeHist(ROI_V)
-      ret1,ROI1=cv.threshold(ROI_V,50,255,cv.THRESH_BINARY_INV)
+      ret1,ROI1=cv.threshold(ROI_V,30,255,cv.THRESH_BINARY_INV)
       #cv.imshow("roi_v",ROI1)
+      ROI1 = cv.bitwise_or(ROI1,ROIlast)
       contours, hierarchy = cv.findContours(ROI1,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
       trackheigh = [0]
       dischargeheigh = [0]
@@ -199,25 +201,27 @@ def pic_process(color,flag,path):
          pentagram = contours[i]
          lowmost = tuple(pentagram[:,0][pentagram[:,:,1].argmin()])  
          highmost = tuple(pentagram[:,0][pentagram[:,:,1].argmax()])
-         cv.circle(ROI, lowmost, 2, (0,255,255),3)   
-         cv.circle(ROI, highmost, 2, (0,0,255),3)
+         #cv.circle(ROI, lowmost, 2, (0,255,255),3)   
+         #cv.circle(ROI, highmost, 2, (0,0,255),3)
          dischargeheigh.append(highmost[1]-lowmost[1])
       dischargeheigh_percent = 100*max(dischargeheigh)/ROI.shape[0]
       discharge_percentage=discharge_area*100/(ROI.shape[0]*ROI.shape[1])
-      #print("trackarea %.2f%%" % tracking_percentage)
-      #print("trackheigh percent %.2f%%" % trackheigh_percent)
-      #print("Dischargearea %.2f%%" % discharge_percentage)
-      #print("distrageheigh percent %.2f%%" % dischargeheigh_percent)
-      #cv.imshow("Region",ROI)
-      #cv.waitKey(0)
-      #cv.destroyAllWindows()
-   return tracking_percentage,discharge_percentage,dischargeheigh_percent
+      print("trackarea %.2f%%" % tracking_percentage)
+      print("trackheigh percent %.2f%%" % trackheigh_percent)
+      print("Dischargearea %.2f%%" % discharge_percentage)
+      print("distrageheigh percent %.2f%%" % dischargeheigh_percent)
+      cv.imshow("Region",ROI)
+      cv.waitKey(200)
+      cv.destroyAllWindows()
+   return tracking_percentage,trackheigh_percent,discharge_percentage,dischargeheigh_percent,ROI1
 
 if __name__ == "__main__":
    print ('This is main of module "pic_processing.py"')
+   ROIlast = 0
    for root,dirs,files in os.walk(image_road):
       for file in files:
          path=root+'/'+file
-         a,b,c =pic_process('red',False,path)
-         print("%f %f %f" % (a,b,c))
+         a,b,c,d,ROInow =pic_process('red',False,path,ROIlast)
+         ROIlast = ROInow
+         #print("%f %f %f" % (a,b,c))
 
