@@ -48,14 +48,16 @@ for i in range(len(audio_time_list)):
             
 # 对图片进行处理,写入相关信息
 for item,key in dic.items():
-    for j in range(len(key)):
-        path = image_road+'/' + key[j]
-        # 调用图片处理函数对图片信息进行采集
-        tracking_percentage,discharge_percentage=pic_process('white',False,path)
-        # 将pic的信息按顺序写入csv文件中
-        stu1 = [item,key[j],str(round(discharge_percentage,2))+'%',str(round(tracking_percentage,2))+'%']
-        csv_file = open(link_road,"a",newline = "")
-        csv_write = csv.writer(csv_file,dialect='excel')
-        csv_write.writerow(stu1)
-        csv_file.close()
-        cv.waitkey()
+        ROIlast = 0
+        for j in range(len(key)):
+                path = image_road+'/' + key[j]
+                # 调用图片处理函数对图片信息进行采集
+                tracking_percentage,trackheigh_percent,discharge_percentage,dischargeheigh_percent,ROInow=pic_process('white',False,path,ROIlast)
+                ROIlast = ROInow
+                # 将pic的信息按顺序写入csv文件中
+                stu1 = [item,key[j],str(round(discharge_percentage,2))+'%',str(round(tracking_percentage,2))+'%']
+                csv_file = open(link_road,"a",newline = "")
+                csv_write = csv.writer(csv_file,dialect='excel')
+                csv_write.writerow(stu1)
+                csv_file.close()
+                cv.waitkey(100)
